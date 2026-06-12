@@ -26,10 +26,11 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const allowedOrigins = clientUrl.split(',').map((origin) => origin.trim()).filter(Boolean);
 
 const io = new Server(server, {
   cors: {
-    origin: clientUrl,
+    origin: allowedOrigins,
     credentials: true
   }
 });
@@ -37,10 +38,25 @@ const io = new Server(server, {
 app.set('io', io);
 initializeSockets(io);
 
-app.use(cors({ origin: clientUrl, credentials: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 app.use(morgan('dev'));
+
+app.get('/', (req, res) => {
+  res.json({
+    service: 'workforce-platform-api',
+    status: 'ok'
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    service: 'workforce-platform-api',
+    status: 'ok',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -78,12 +94,10 @@ const connectDatabase = async () => {
 
 const port = process.env.PORT || 5000;
 
-connectDatabase()
-  .catch((error) => {
-    console.error('MongoDB connection failed:', error.message);
-  })
-  .finally(() => {
-    server.listen(port, () => {
-      console.log(`Server listening on port ${port}`);
-    });
-  });
+server.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
+
+connectDatabase().catch((error) => {
+  console.error('MongoDB connection failed:', error.message);
+});
