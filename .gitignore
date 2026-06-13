@@ -5,6 +5,7 @@ build/
 .env.local
 server/.env
 client/.env
+client/.env.production
 npm-debug.log*
 *.log
 .DS_Store
