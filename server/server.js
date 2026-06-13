@@ -25,8 +25,24 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-const allowedOrigins = clientUrl.split(',').map((origin) => origin.trim()).filter(Boolean);
+const productionClientUrl = 'https://interviewer-website-five.vercel.app';
+const localClientUrl = 'http://localhost:5173';
+const isHostedRuntime =
+  process.env.NODE_ENV === 'production' ||
+  Object.keys(process.env).some((key) => key.startsWith('RAILWAY_') || key.startsWith('RENDER'));
+const allowLocalhostOrigins = process.env.ALLOW_LOCALHOST_ORIGINS === 'true' || !isHostedRuntime;
+const configuredOrigins = (process.env.CLIENT_URL || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const defaultOrigins = [productionClientUrl, localClientUrl];
+const allowedOrigins = [...new Set([...configuredOrigins, ...defaultOrigins])].filter((origin) => {
+  if (allowLocalhostOrigins) {
+    return true;
+  }
+
+  return !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+});
 
 const io = new Server(server, {
   cors: {

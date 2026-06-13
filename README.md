@@ -68,7 +68,7 @@ Deploy the app as two services:
    - `MONGO_URI` - production MongoDB Atlas URI, not the test URI.
    - `JWT_SECRET` - production random secret.
    - `JWT_REFRESH_SECRET` - production random refresh secret.
-   - `CLIENT_URL` - the deployed Vercel frontend URL.
+   - `CLIENT_URL` - the deployed Vercel frontend URL, for example `https://interviewer-website-five.vercel.app` with no trailing slash.
    - `CLOUDINARY_CLOUD_NAME`
    - `CLOUDINARY_API_KEY`
    - `CLOUDINARY_API_SECRET`
@@ -85,6 +85,7 @@ The backend exposes `/` and `/api/health`, so the service URL should show JSON i
    - Start command: `npm start --prefix server`
    - Healthcheck path: `/api/health`
 4. Add the same backend environment variables listed above.
+5. In production, localhost origins are blocked unless `ALLOW_LOCALHOST_ORIGINS=true` is set deliberately for temporary testing.
 
 ### Frontend on Vercel
 
