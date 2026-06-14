@@ -4,7 +4,7 @@ import http from 'http';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import mongoose from 'mongoose';
+import mongoose from './config/mongoose.js';
 import { Server } from 'socket.io';
 
 import authRoutes from './routes/authRoutes.js';
@@ -104,7 +104,9 @@ const connectDatabase = async () => {
     return;
   }
 
-  await mongoose.connect(process.env.MONGO_URI);
+  await mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 30000
+  });
   console.log('MongoDB connected');
 };
 
@@ -115,5 +117,5 @@ server.listen(port, () => {
 });
 
 connectDatabase().catch((error) => {
-  console.error('MongoDB connection failed:', error.message);
+  console.error('MongoDB connection failed:', error);
 });
